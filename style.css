@@ -1,0 +1,116 @@
+:root {
+    --bg-color: #f9f9f2;
+    --border-color: #e0e0d5;
+    --text-main: #333;
+    --red-alert: #b32424;
+    --green-safe: #2e7d32;
+    --ghost-btn: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+}
+
+/* Nav & Menu */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-btn {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.menu-btn.active {
+    background: #333;
+    color: white;
+}
+
+/* Cards & Tables */
+.card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #fafafa;
+}
+
+/* Ghost Buttons */
+.ghost-btn {
+    background: var(--ghost-btn);
+    border: 1px solid #ccc;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+/* Status Labels */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.7rem;
+}
+
+.status-tag.delinquent {
+    background: var(--red-alert);
+    color: white;
+}
+
+.status-tag.current {
+    background: #e0e0e0;
+    color: #666;
+}
+
+/* Toggle Switch (Lockdown) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 20px;
+}
+
+/* Detail Grid */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.gauge { width: 100%; height: auto; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.red-text { color: var(--red-alert); font-weight: bold; }
+.v-green { color: var(--green-safe); font-size: 0.7rem; font-weight: bold; }
