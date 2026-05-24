@@ -1,368 +1,119 @@
-:root {
-    --bg-color: #f8fafc;
-    --card-bg: #ffffff;
-    --border-color: #e2e8f0;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --red-alert: #ef4444;
-    --green-safe: #22c55e;
-    --yellow-warning: #f59e0b;
+// Expanded Demo Data for Active Debtors
+const debtors = [
+    { id: 1, name: "JOHN DOE", vehicle: "1231 PHRS CAR", due: "05/19/2026", status: "Delinquent", risk: 78, stability: "Poor", balance: "$240", habits: "Multiple NSF Fees", selfie: "https://i.pravatar.cc/150?u=1" },
+    { id: 2, name: "JANA RUTH", vehicle: "1225 NORT-HBONEE", due: "05/29/2026", status: "Current", risk: 15, stability: "Excellent", balance: "$3,150", habits: "None", selfie: "https://i.pravatar.cc/150?u=2" },
+    { id: 3, name: "ALEX GRGAN", vehicle: "1220 BNRS CAR", due: "05/28/2026", status: "Current", risk: 45, stability: "Fair", balance: "$980", habits: "High discretionary", selfie: "https://i.pravatar.cc/150?u=3" },
+    { id: 4, name: "SARAH JENKINS", vehicle: "2019 FORD F-150", due: "05/15/2026", status: "Delinquent", risk: 82, stability: "Unstable", balance: "$45", habits: "Overdraft history", selfie: "https://i.pravatar.cc/150?u=4" },
+    { id: 5, name: "MICHAEL CHEN", vehicle: "2021 TOYOTA CAMRY", due: "06/02/2026", status: "Current", risk: 10, stability: "Excellent", balance: "$5,420", habits: "Consistent savings", selfie: "https://i.pravatar.cc/150?u=5" },
+    { id: 6, name: "MARIA GARCIA", vehicle: "2018 CHEVY EQUINOX", due: "05/22/2026", status: "Current", risk: 30, stability: "Good", balance: "$1,100", habits: "Regular utility payments", selfie: "https://i.pravatar.cc/150?u=6" }
+];
+
+// Expanded Demo Data for Payment Tracker
+const payments = [
+    { date: "2026-05-01", name: "JOHN DOE", amount: "$400", method: "Cash", status: "Current" },
+    { date: "2026-05-15", name: "JANA RUTH", amount: "$400", method: "ACH", status: "Current" },
+    { date: "2026-05-10", name: "JOHN DOE", amount: "$0", method: "N/A", status: "Delinquent" },
+    { date: "2026-05-12", name: "SARAH JENKINS", amount: "$0", method: "N/A", status: "Delinquent" },
+    { date: "2026-05-20", name: "ALEX GRGAN", amount: "$350", method: "Debit", status: "Current" },
+    { date: "2026-05-21", name: "MICHAEL CHEN", amount: "$500", method: "ACH", status: "Current" },
+    { date: "2026-05-22", name: "MARIA GARCIA", amount: "$300", method: "Cash", status: "Current" },
+    { date: "2026-04-15", name: "SARAH JENKINS", amount: "$450", method: "Debit", status: "Current" }
+];
+
+function init() {
+    renderDebtorsList(debtors);
+    renderHistory();
+    // Default select the first record
+    if(debtors.length > 0) selectDebtor(debtors[0].id);
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    margin: 0;
-    padding: 24px;
+function renderDebtorsList(list) {
+    const body = document.getElementById('debtorBody');
+    body.innerHTML = list.map(d => `
+        <tr onclick="selectDebtor(${d.id})" id="row-${d.id}">
+            <td>${d.id}</td>
+            <td><img src="${d.selfie}" width="30" height="30" style="border-radius:50%"></td>
+            <td><strong>${d.name}</strong><br><small>${d.vehicle}</small></td>
+            <td>${d.due}</td>
+            <td><span class="status-tag ${d.status.toLowerCase()}">${d.status.toUpperCase()}</span></td>
+            <td>
+                <label class="switch" onclick="event.stopPropagation();">
+                    <input type="checkbox" ${d.status === 'Delinquent' ? 'checked' : ''} onchange="toggleLockdown(${d.id}, this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </td>
+            <td><button class="ghost-btn" onclick="event.stopPropagation(); viewDebtorHistory('${d.name}')">VIEW</button></td>
+            <td><button class="ghost-btn">LOG</button> <button class="ghost-btn">LINK</button></td>
+        </tr>
+    `).join('');
 }
 
-/* Navigation Menu */
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-}
+function selectDebtor(id) {
+    const d = debtors.find(x => x.id === id);
+    if (!d) return;
 
-.brand {
-    font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
-}
+    document.querySelectorAll('tr').forEach(r => r.style.background = 'transparent');
+    const selectedRow = document.getElementById(`row-${id}`);
+    if(selectedRow) selectedRow.style.background = '#f1f5f9';
 
-.brand span {
-    font-weight: 400;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-.stats {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.delinquent-banner {
-    color: var(--red-alert);
-}
-
-.menu-btn {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    padding: 8px 16px;
-    cursor: pointer;
-    margin-left: 6px;
-    font-weight: 500;
-    color: var(--text-main);
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.menu-btn.active {
-    background: var(--text-main);
-    color: white;
-    border-color: var(--text-main);
-}
-
-/* Layout Framework */
-.card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 24px;
-}
-
-.header-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-h3, h4, h5 {
-    margin: 0 0 10px 0;
-    letter-spacing: 0.5px;
-}
-
-h3 { font-size: 1.1rem; color: var(--text-main); }
-h4 { font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-
-/* Dynamic Search Bars */
-.search-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.search-container label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.search-container input[type="text"], .search-container select {
-    padding: 6px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 0.85rem;
-    color: var(--text-main);
-    background: var(--card-bg);
-}
-
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    text-align: left;
-    border-bottom: 2px solid var(--border-color);
-    padding: 12px 8px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-}
-
-td {
-    padding: 14px 8px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    vertical-align: middle;
-}
-
-/* Minimalist Table Status Overlays */
-.status-tag {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.75rem;
-    display: inline-block;
-}
-
-.status-tag.delinquent {
-    background-color: #fef2f2;
-    color: var(--red-alert);
-    border: 1px solid #fee2e2;
-}
-
-.status-tag.current {
-    background-color: transparent;
-    color: var(--text-muted);
-}
-
-/* Ghost Buttons Only */
-.ghost-btn {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-main);
-    transition: all 0.2s;
-}
-
-.ghost-btn:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-}
-
-/* Custom CSS Hardware Lockdown Switch Toggle */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 36px;
-    height: 20px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #cbd5e1;
-    transition: .2s;
-    border-radius: 20px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .2s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: var(--red-alert);
-}
-
-input:checked + .slider:before {
-    transform: translateX(16px);
-}
-
-/* Responsive Dashboard Analytics Layout Panels */
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr 1fr;
-    gap: 20px;
-    min-height: 280px;
-}
-
-/* Left Panel Elements */
-.id-container {
-    display: flex;
-    gap: 16px;
-    margin-top: 12px;
-}
-
-.selfie-box {
-    position: relative;
-    width: 110px;
-    height: 110px;
-}
-
-.selfie-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-}
-
-.verified-tag {
-    position: absolute;
-    bottom: 0; width: 100%;
-    background: rgba(34, 197, 94, 0.9);
-    color: white;
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-align: center;
-    padding: 3px 0;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-.id-metrics p {
-    margin: 4px 0;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.match-text {
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    color: var(--text-main);
-}
-
-/* Middle Gauge Vectors */
-.gauge-container {
-    display: flex;
-    justify-content: center;
-    padding: 10px 0;
-}
-
-.gauge-box {
-    width: 160px;
-    text-align: center;
-}
-
-#riskNeedle {
-    transform-origin: 50px 45px;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.gauge-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin: 6px 0 0 0;
-}
-
-.analysis-details h5 {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-}
-
-.factors-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 10px 0;
-    font-size: 0.8rem;
-}
-
-.factors-list li {
-    margin-bottom: 4px;
-}
-
-.habits {
-    background: #f8fafc;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    border-left: 3px solid var(--border-color);
-}
-
-/* Right Clean List Document Pipeline */
-.doc-list {
-    list-style: none;
-    padding: 0;
-    margin: 12px 0;
-}
-
-.doc-list li {
-    padding: 8px 0;
-    border-bottom: 1px dashed var(--border-color);
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-.status-up { color: var(--yellow-warning); font-weight: 700; font-size: 0.75rem; }
-.status-pend { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; }
-
-.overall-status-box {
-    margin-top: 16px;
-    background: #fafafa;
-    padding: 12px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-}
-
-.overall-status-box h5 { font-size: 0.7rem; color: var(--text-muted); margin: 0; }
-
-.red-text { color: var(--red-alert); font-weight: 800; font-size: 0.85rem; margin: 4px 0; }
-.green-text { color: var(--green-safe); font-weight: 800; font-size: 0.85rem; margin: 4px 0; }
-
-.process-btn {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    background: #f1f5f9;
-    color: #94a3b8;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: not-allowed;
-}
-
-.v-green { color: var(--green-safe); font-weight: 700; }
-.page { display: none; }
-.page.active { display: block; }
+    document.getElementById('detailSelfie').src = d.selfie;
+    document.getElementById('riskValue').innerText = d.risk;
+    document.getElementById('incomeStability').innerText = d.stability;
+    document.getElementById('avgBalance').innerText = d.balance;
+    document.getElementById('flaggedHabits').innerText = d.habits;
     
+    // Needle logic: 100% Risk = -90deg, 0% Risk = 90deg
+    const angle = -90 + ((100 - d.risk) * 1.8);
+    document.getElementById('riskNeedle').style.transform = `rotate(${angle}deg)`;
+
+    const statusTxt = document.getElementById('overallStatusText');
+    statusTxt.innerText = d.status === 'Delinquent' ? "RED (DELINQUENT)" : "GREEN (VERIFIED)";
+    statusTxt.className = d.status === 'Delinquent' ? "red-text" : "v-green";
+}
+
+function filterDebtors() {
+    const q = document.getElementById('dashSearch').value.toLowerCase();
+    renderDebtorsList(debtors.filter(d => d.name.toLowerCase().includes(q) || d.id.toString().includes(q)));
+}
+
+function toggleLockdown(id, isChecked) {
+    const d = debtors.find(x => x.id === id);
+    if (d) { 
+        d.status = isChecked ? 'Delinquent' : 'Current'; 
+        renderDebtorsList(debtors); 
+        selectDebtor(id); 
+    }
+}
+
+function showPage(pId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pId).classList.add('active');
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`nav-${pId}`).classList.add('active');
+}
+
+function viewDebtorHistory(name) {
+    showPage('history');
+    document.getElementById('histSearch').value = name;
+    filterHistory();
+}
+
+function renderHistory() {
+    const q = document.getElementById('histSearch').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    const filtered = payments.filter(p => 
+        p.name.toLowerCase().includes(q) && (s === 'all' || p.status === s)
+    );
+    document.getElementById('historyBody').innerHTML = filtered.map(p => `
+        <tr>
+            <td>${p.date}</td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.amount}</td>
+            <td>${p.method}</td>
+            <td><span class="status-tag ${p.status.toLowerCase()}">${p.status}</span></td>
+        </tr>
+    `).join('');
+}
+
+function filterHistory() { renderHistory(); }
+window.onload = init;
