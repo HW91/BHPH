@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BHPH Auto Advance - Mockup</title>
+    <title>Auto Advance Admin Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="top-nav">
         <div class="brand">BHPH AUTO ADVANCE <span>(FLORIDA LOT #02)</span></div>
-        <div class="stats">ACTIVE FLEET: 24 | <span class="delinquent">DELINQUENT: 3</span> | IMMOBILIZED: 1</div>
+        <div class="stats">ACTIVE FLEET: 24 | <span class="delinquent-banner">DELINQUENT: 3</span> | IMMOBILIZED: 1</div>
         <div class="menu">
-            <button onclick="showPage('dashboard')" class="menu-btn active">Dashboard</button>
-            <button onclick="showPage('history')" class="menu-btn">Payment History</button>
+            <button id="nav-dashboard" onclick="showPage('dashboard')" class="menu-btn active">Dashboard</button>
+            <button id="nav-history" onclick="showPage('history')" class="menu-btn">Payment History</button>
         </div>
     </nav>
 
-    <!-- PAGE 1: UNDERWRITING DASHBOARD -->
     <main id="dashboard" class="page active">
         <section class="card active-debtors">
-            <h3>ACTIVE DEBTORS</h3>
+            <div class="header-flex">
+                <h3>ACTIVE DEBTORS</h3>
+                <div class="search-container">
+                    <label for="dashSearch">Search:</label>
+                    <input type="text" id="dashSearch" placeholder="Name or ID..." onkeyup="filterDebtors()">
+                </div>
+            </div>
             <table id="debtorTable">
                 <thead>
                     <tr>
@@ -29,22 +34,21 @@
                         <th>DUE DATE</th>
                         <th>STATUS</th>
                         <th>LOCKDOWN</th>
+                        <th>VIEW</th>
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody id="debtorBody">
-                    <!-- Rows injected by JS -->
-                </tbody>
+                    </tbody>
             </table>
         </section>
 
         <div class="detail-grid">
-            <!-- Left: Identity -->
             <section class="card detail-card">
                 <h4>IDENTITY VERIFICATION</h4>
                 <div class="id-container">
                     <div class="selfie-box">
-                        <img id="detailSelfie" src="https://via.placeholder.com/150" alt="Selfie">
+                        <img id="detailSelfie" src="https://i.pravatar.cc/150?u=1" alt="Selfie">
                         <div class="verified-tag">RETRIEVED: COMPLETE</div>
                     </div>
                     <div class="id-metrics">
@@ -56,36 +60,33 @@
                 </div>
             </section>
 
-            <!-- Middle: Bank Analysis -->
             <section class="card detail-card">
-                <h4>BANK & CREDIT ANALYSIS</h4>
-                <div class="gauge-container">
+                <h4>RISK ANALYSIS</h4>
+                <div class="gauge-container single-gauge">
                     <div class="gauge-box">
                         <svg viewBox="0 0 100 50" class="gauge">
-                            <path d="M10,45 A40,40 0 0,1 90,45" fill="none" stroke="#ddd" stroke-width="8"/>
+                            <path d="M10,45 A40,40 0 0,1 90,45" fill="none" stroke="#e2e8f0" stroke-width="8"/>
                             <path d="M10,45 A40,40 0 0,1 30,15" fill="none" stroke="#e74c3c" stroke-width="8"/>
                             <path d="M30,15 A40,40 0 0,1 50,10" fill="none" stroke="#f39c12" stroke-width="8"/>
                             <path d="M50,10 A40,40 0 0,1 70,15" fill="none" stroke="#f1c40f" stroke-width="8"/>
                             <path d="M70,15 A40,40 0 0,1 90,45" fill="none" stroke="#2ecc71" stroke-width="8"/>
-                            <line id="riskNeedle" x1="50" y1="45" x2="20" y2="25" stroke="black" stroke-width="2" />
+                            <line id="riskNeedle" x1="50" y1="45" x2="50" y2="10" stroke="black" stroke-width="2" stroke-linecap="round" />
                         </svg>
-                        <p>DEFAULT GAUGE: <span id="riskValue">78</span> (HIGH)</p>
-                    </div>
-                    <div class="gauge-box">
-                        <svg viewBox="0 0 100 50" class="gauge">
-                            <path d="M10,45 A40,40 0 0,1 90,45" fill="none" stroke="#ddd" stroke-width="8"/>
-                            <path d="M10,45 A40,40 0 0,1 90,45" class="gauge-bg" fill="none" stroke-width="8"/>
-                            <line id="stabilityNeedle" x1="50" y1="45" x2="70" y2="20" stroke="black" stroke-width="2" />
-                        </svg>
-                        <p>STABILITY SCORE: <span id="stabilityValue">68</span></p>
+                        <p class="gauge-label">DEFAULT RISK: <span id="riskValue">78</span>%</p>
                     </div>
                 </div>
-                <div class="habits">
-                    <strong>FLAGGED HABITS:</strong> Multiple NSF Fees, DraftKings Activity.
+                <div class="analysis-details">
+                    <h5>CASH STABILITY FACTORS</h5>
+                    <ul class="factors-list">
+                        <li>Income Consistency: <span id="incomeStability">Poor</span></li>
+                        <li>Avg. Monthly Balance: <span id="avgBalance">$240</span></li>
+                    </ul>
+                    <div class="habits">
+                        <strong>FLAGGED HABITS:</strong> <span id="flaggedHabits">Multiple NSF Fees, DraftKings Activity.</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Right: Documents -->
             <section class="card detail-card">
                 <h4>LOAN DOCUMENTS & STATUS</h4>
                 <ul class="doc-list">
@@ -95,23 +96,26 @@
                 </ul>
                 <div class="overall-status-box">
                     <h5>OVERALL STATUS</h5>
-                    <p class="red-text">RED (DELINQUENT - LOAN PENDING)</p>
+                    <p id="overallStatusText" class="red-text">RED (DELINQUENT - LOAN PENDING)</p>
                     <button class="process-btn" disabled>PROCESS LOAN (DISABLED)</button>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- PAGE 2: PAYMENT HISTORY -->
     <main id="history" class="page">
         <section class="card">
             <div class="header-flex">
                 <h3>PAYMENT TRACKER</h3>
-                <select id="statusFilter" onchange="filterHistory()">
-                    <option value="all">All Statuses</option>
-                    <option value="Current">Current</option>
-                    <option value="Delinquent">Delinquent</option>
-                </select>
+                <div class="search-container">
+                    <label for="histSearch">Search:</label>
+                    <input type="text" id="histSearch" placeholder="Debtor name..." onkeyup="filterHistory()">
+                    <select id="statusFilter" onchange="filterHistory()">
+                        <option value="all">All Statuses</option>
+                        <option value="Current">Current</option>
+                        <option value="Delinquent">Delinquent</option>
+                    </select>
+                </div>
             </div>
             <table>
                 <thead>
@@ -124,13 +128,11 @@
                     </tr>
                 </thead>
                 <tbody id="historyBody">
-                    <!-- Data injected by JS -->
-                </tbody>
+                    </tbody>
             </table>
         </section>
     </main>
 
     <script src="script.js"></script>
 </body>
-                              </html>
-                      
+</html>
