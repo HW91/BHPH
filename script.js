@@ -1,14 +1,12 @@
-// Expanded Demo Data for Active Debtors
 const debtors = [
-    { id: 1, name: "JOHN DOE", vehicle: "1231 PHRS CAR", due: "05/19/2026", status: "Delinquent", risk: 78, stability: "Poor", balance: "$240", habits: "Multiple NSF Fees", selfie: "https://i.pravatar.cc/150?u=1" },
-    { id: 2, name: "JANA RUTH", vehicle: "1225 NORT-HBONEE", due: "05/29/2026", status: "Current", risk: 15, stability: "Excellent", balance: "$3,150", habits: "None", selfie: "https://i.pravatar.cc/150?u=2" },
-    { id: 3, name: "ALEX GRGAN", vehicle: "1220 BNRS CAR", due: "05/28/2026", status: "Current", risk: 45, stability: "Fair", balance: "$980", habits: "High discretionary", selfie: "https://i.pravatar.cc/150?u=3" },
-    { id: 4, name: "SARAH JENKINS", vehicle: "2019 FORD F-150", due: "05/15/2026", status: "Delinquent", risk: 82, stability: "Unstable", balance: "$45", habits: "Overdraft history", selfie: "https://i.pravatar.cc/150?u=4" },
-    { id: 5, name: "MICHAEL CHEN", vehicle: "2021 TOYOTA CAMRY", due: "06/02/2026", status: "Current", risk: 10, stability: "Excellent", balance: "$5,420", habits: "Consistent savings", selfie: "https://i.pravatar.cc/150?u=5" },
-    { id: 6, name: "MARIA GARCIA", vehicle: "2018 CHEVY EQUINOX", due: "05/22/2026", status: "Current", risk: 30, stability: "Good", balance: "$1,100", habits: "Regular utility payments", selfie: "https://i.pravatar.cc/150?u=6" }
+    { id: 1, name: "JOHN DOE", vehicle: "1231 PHRS CAR", due: "05/19/2026", status: "Delinquent", risk: 78, stability: "Poor", balance: "$240", habits: "Multiple NSF Fees", selfie: "https://randomuser.me/api/portraits/men/32.jpg" },
+    { id: 2, name: "JANA RUTH", vehicle: "1225 NORT-HBONEE", due: "05/29/2026", status: "Current", risk: 15, stability: "Excellent", balance: "$3,150", habits: "None", selfie: "https://randomuser.me/api/portraits/men/44.jpg" },
+    { id: 3, name: "ALEX GRGAN", vehicle: "1220 BNRS CAR", due: "05/28/2026", status: "Current", risk: 45, stability: "Fair", balance: "$980", habits: "High discretionary", selfie: "https://randomuser.me/api/portraits/men/22.jpg" },
+    { id: 4, name: "SARAH JENKINS", vehicle: "2019 FORD F-150", due: "05/15/2026", status: "Delinquent", risk: 82, stability: "Unstable", balance: "$45", habits: "Overdraft history", selfie: "https://randomuser.me/api/portraits/men/65.jpg" },
+    { id: 5, name: "MICHAEL CHEN", vehicle: "2021 TOYOTA CAMRY", due: "06/02/2026", status: "Current", risk: 10, stability: "Excellent", balance: "$5,420", habits: "Consistent savings", selfie: "https://randomuser.me/api/portraits/men/78.jpg" },
+    { id: 6, name: "MARIA GARCIA", vehicle: "2018 CHEVY EQUINOX", due: "05/22/2026", status: "Current", risk: 30, stability: "Good", balance: "$1,100", habits: "Regular utility payments", selfie: "https://randomuser.me/api/portraits/men/50.jpg" }
 ];
 
-// Expanded Demo Data for Payment Tracker
 const payments = [
     { date: "2026-05-01", name: "JOHN DOE", amount: "$400", method: "Cash", status: "Current" },
     { date: "2026-05-15", name: "JANA RUTH", amount: "$400", method: "ACH", status: "Current" },
@@ -23,7 +21,6 @@ const payments = [
 function init() {
     renderDebtorsList(debtors);
     renderHistory();
-    // Default select the first record
     if(debtors.length > 0) selectDebtor(debtors[0].id);
 }
 
@@ -32,7 +29,6 @@ function renderDebtorsList(list) {
     body.innerHTML = list.map(d => `
         <tr onclick="selectDebtor(${d.id})" id="row-${d.id}">
             <td>${d.id}</td>
-            <td><img src="${d.selfie}" width="30" height="30" style="border-radius:50%"></td>
             <td><strong>${d.name}</strong><br><small>${d.vehicle}</small></td>
             <td>${d.due}</td>
             <td><span class="status-tag ${d.status.toLowerCase()}">${d.status.toUpperCase()}</span></td>
@@ -62,7 +58,6 @@ function selectDebtor(id) {
     document.getElementById('avgBalance').innerText = d.balance;
     document.getElementById('flaggedHabits').innerText = d.habits;
     
-    // Needle logic: 100% Risk = -90deg, 0% Risk = 90deg
     const angle = -90 + ((100 - d.risk) * 1.8);
     document.getElementById('riskNeedle').style.transform = `rotate(${angle}deg)`;
 
