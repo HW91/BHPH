@@ -1,76 +1,368 @@
-const debtors = [
-    { id: 1, name: "JOHN DOE", vehicle: "1231 PHRS CAR", due: "07/19/2023", status: "Delinquent", risk: 78, stability: 32, selfie: "https://i.pravatar.cc/150?u=1" },
-    { id: 2, name: "JANA RUTH", vehicle: "1225 NORT-HBONEE", due: "01/29/2023", status: "Current", risk: 20, stability: 85, selfie: "https://i.pravatar.cc/150?u=2" },
-    { id: 3, name: "ALEX GRGAN", vehicle: "1220 BNRS CAR", due: "07/28/2023", status: "Current", risk: 45, stability: 50, selfie: "https://i.pravatar.cc/150?u=3" }
-];
-
-const payments = [
-    { date: "2023-07-01", name: "JOHN DOE", amount: "$400", method: "Cash", status: "Current" },
-    { date: "2023-06-15", name: "JANA RUTH", amount: "$400", method: "ACH", status: "Current" },
-    { date: "2023-07-10", name: "JOHN DOE", amount: "$0", method: "N/A", status: "Delinquent" }
-];
-
-function init() {
-    renderDebtors();
-    renderHistory();
+:root {
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --red-alert: #ef4444;
+    --green-safe: #22c55e;
+    --yellow-warning: #f59e0b;
 }
 
-function renderDebtors() {
-    const body = document.getElementById('debtorBody');
-    body.innerHTML = debtors.map(d => `
-        <tr onclick="selectDebtor(${d.id})" style="cursor:pointer">
-            <td>${d.id}</td>
-            <td><img src="${d.selfie}" width="30" style="border-radius:50%"></td>
-            <td><strong>${d.name}</strong><br><small>${d.vehicle}</small></td>
-            <td>${d.due}</td>
-            <td><span class="status-tag ${d.status.toLowerCase()}">${d.status.toUpperCase()}</span></td>
-            <td><input type="checkbox" ${d.status === 'Delinquent' ? 'checked' : ''}></td>
-            <td>
-                <button class="ghost-btn">LOG CASH PAYMENT</button>
-                <button class="ghost-btn">SEND LINK</button>
-            </td>
-        </tr>
-    `).join('');
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 24px;
 }
 
-function selectDebtor(id) {
-    const d = debtors.find(x => x.id === id);
-    document.getElementById('detailSelfie').src = d.selfie;
-    document.getElementById('riskValue').innerText = d.risk;
-    document.getElementById('stabilityValue').innerText = d.stability;
+/* Navigation Menu */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.brand {
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+.brand span {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.stats {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.delinquent-banner {
+    color: var(--red-alert);
+}
+
+.menu-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    cursor: pointer;
+    margin-left: 6px;
+    font-weight: 500;
+    color: var(--text-main);
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.menu-btn.active {
+    background: var(--text-main);
+    color: white;
+    border-color: var(--text-main);
+}
+
+/* Layout Framework */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+h3, h4, h5 {
+    margin: 0 0 10px 0;
+    letter-spacing: 0.5px;
+}
+
+h3 { font-size: 1.1rem; color: var(--text-main); }
+h4 { font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+
+/* Dynamic Search Bars */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-container label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.search-container input[type="text"], .search-container select {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    background: var(--card-bg);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    border-bottom: 2px solid var(--border-color);
+    padding: 12px 8px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 14px 8px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+/* Minimalist Table Status Overlays */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: inline-block;
+}
+
+.status-tag.delinquent {
+    background-color: #fef2f2;
+    color: var(--red-alert);
+    border: 1px solid #fee2e2;
+}
+
+.status-tag.current {
+    background-color: transparent;
+    color: var(--text-muted);
+}
+
+/* Ghost Buttons Only */
+.ghost-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-main);
+    transition: all 0.2s;
+}
+
+.ghost-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* Custom CSS Hardware Lockdown Switch Toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .2s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .2s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--red-alert);
+}
+
+input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
+/* Responsive Dashboard Analytics Layout Panels */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 20px;
+    min-height: 280px;
+}
+
+/* Left Panel Elements */
+.id-container {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.selfie-box {
+    position: relative;
+    width: 110px;
+    height: 110px;
+}
+
+.selfie-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.verified-tag {
+    position: absolute;
+    bottom: 0; width: 100%;
+    background: rgba(34, 197, 94, 0.9);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 3px 0;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.id-metrics p {
+    margin: 4px 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.match-text {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main);
+}
+
+/* Middle Gauge Vectors */
+.gauge-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.gauge-box {
+    width: 160px;
+    text-align: center;
+}
+
+#riskNeedle {
+    transform-origin: 50px 45px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gauge-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin: 6px 0 0 0;
+}
+
+.analysis-details h5 {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.factors-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+    font-size: 0.8rem;
+}
+
+.factors-list li {
+    margin-bottom: 4px;
+}
+
+.habits {
+    background: #f8fafc;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    border-left: 3px solid var(--border-color);
+}
+
+/* Right Clean List Document Pipeline */
+.doc-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.doc-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.status-up { color: var(--yellow-warning); font-weight: 700; font-size: 0.75rem; }
+.status-pend { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; }
+
+.overall-status-box {
+    margin-top: 16px;
+    background: #fafafa;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.overall-status-box h5 { font-size: 0.7rem; color: var(--text-muted); margin: 0; }
+
+.red-text { color: var(--red-alert); font-weight: 800; font-size: 0.85rem; margin: 4px 0; }
+.green-text { color: var(--green-safe); font-weight: 800; font-size: 0.85rem; margin: 4px 0; }
+
+.process-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+.v-green { color: var(--green-safe); font-weight: 700; }
+.page { display: none; }
+.page.active { display: block; }
     
-    // Rotate needles (0 to 180 degrees)
-    // Formula: (Value / 100) * 180 - 90 (approximate for SVG)
-    document.getElementById('riskNeedle').style.transform = `rotate(${d.risk * 1.8}deg)`;
-    document.getElementById('stabilityNeedle').style.transform = `rotate(${d.stability * 1.8}deg)`;
-}
-
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    
-    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-}
-
-function renderHistory(filter = 'all') {
-    const body = document.getElementById('historyBody');
-    const filtered = filter === 'all' ? payments : payments.filter(p => p.status === filter);
-    body.innerHTML = filtered.map(p => `
-        <tr>
-            <td>${p.date}</td>
-            <td>${p.name}</td>
-            <td>${p.amount}</td>
-            <td>${p.method}</td>
-            <td><span class="status-tag ${p.status.toLowerCase()}">${p.status}</span></td>
-        </tr>
-    `).join('');
-}
-
-function filterHistory() {
-    const val = document.getElementById('statusFilter').value;
-    renderHistory(val);
-}
-
-window.onload = init;
-                                                                      
